@@ -1,4 +1,5 @@
 ﻿using ImageDuplicateSearcher.Interfaces;
+using ImageDuplicateSearcher.Models;
 using ImageDuplicateSearcher.Settings;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
@@ -27,7 +28,7 @@ public class WorkflowService
 
         AnsiConsole.MarkupLine($"Path [green]{Markup.Escape(_options.ImageDirectory)}[/] contains [yellow]{imageNumber}[/] elements");
 
-        Dictionary<ulong, List<string>> duplicateDictionary = new Dictionary<ulong, List<string>>();
+        Dictionary<ulong, List<ImageModel>> duplicateDictionary = new Dictionary<ulong, List<ImageModel>>();
 
         AnsiConsole.Progress()
             .Start(ctx =>
@@ -40,20 +41,22 @@ public class WorkflowService
 
                     var hash = _imageProcessor.ComputePerceptualHash(thumbnailStream);
 
-                    //var imageModel = new ImageModel
-                    //{
-                    //    FilePath = imagePath,
-                    //    FileSize =
-                    //};
+                    var imageModel = new ImageModel
+                    {
+                        FilePath = imagePath,
+                        FileSize = new FileInfo(imagePath).Length
+                    };
 
                     if (duplicateDictionary.TryGetValue(hash, out var value))
                     {
-                        value.Add(imagePath);
+                        value.Add(imageModel);
                     }
                     else
                     {
-                        duplicateDictionary[hash] = new List<string> { imagePath };
+                        duplicateDictionary[hash] = new List<ImageModel> { imageModel };
                     }
+
+                    task.Increment(1);
                 }
             });
 

@@ -14,7 +14,6 @@ public static class ServiceConfiguration
 
         services.AddTransient<WorkflowService>();
         services.AddTransient<IImageProcessor, ImageProcessor>();
-        services.AddTransient<IDuplicateGrouper, DuplicateGrouper>();
         services.AddTransient<IReporter, Reporter>();
     }
 
