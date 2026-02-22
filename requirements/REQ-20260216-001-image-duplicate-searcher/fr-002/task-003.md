@@ -1,13 +1,13 @@
-# Task 003 — Create IImageProcessor Interface
+# Task 003 — Integrate Scanning into Program.cs
 
 # Description
-Create an IImageProcessor interface in the src folder with a method to scan configured directories and return a list of image file paths.
+Update Program.cs to register ImageProcessor in DI and call ScanDirectory after configuration loading, outputting results to console.
 
 # Deliverable
-New IImageProcessor.cs file with the interface definition.
+Updated Program.cs with DI registration and scanning call.
 
 # Dependencies
-None
+Task 002
 
 # Implementation Notes
-Define the method signature, e.g., Task<List<string>> ScanDirectoriesAsync() or similar. Use PascalCase for naming.
+Register as transient service. Output the list of found image files to console for verification.

@@ -38,6 +38,7 @@ applyTo: '**/*.cs'
 - Demonstrate how to organize code using feature folders or domain-driven design principles.
 - Show proper separation of concerns with models, services, and data access layers.
 - Explain the Program.cs and configuration system in ASP.NET Core 10 including environment-specific settings.
+- Interfaces should be placed in a separate 'Interfaces' folder.
 
 ## Nullable Reference Types
 
@@ -52,14 +53,6 @@ applyTo: '**/*.cs'
 - Demonstrate a global exception handling strategy using middleware.
 - Show how to create consistent error responses across the API.
 - Explain problem details (RFC 7807) implementation for standardized error responses.
-
-## API Versioning and Documentation
-
-- Guide users through implementing and explaining API versioning strategies.
-- Demonstrate Swagger/OpenAPI implementation with proper documentation.
-- Show how to document endpoints, parameters, responses, and authentication.
-- Explain versioning in both controller-based and Minimal APIs.
-- Guide users on creating meaningful API documentation that helps consumers.
 
 ## Testing
 

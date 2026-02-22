@@ -1,3 +1,5 @@
+﻿namespace ImageDuplicateSearcher.Settings;
+
 /// <summary>
 /// Options for image duplication configuration.
 /// </summary>
@@ -15,6 +17,7 @@ public class ImageDuplicationOptions
 
     /// <summary>
     /// Gets or sets the size of the thumbnail in pixels (square).
+    /// Looks like it is useless.
     /// </summary>
     public int ThumbnailSize { get; set; }
 

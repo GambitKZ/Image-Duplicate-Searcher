@@ -1,29 +1,22 @@
-﻿using Microsoft.Extensions.Hosting;
+﻿using ImageDuplicateSearcher.Extensions;
+using ImageDuplicateSearcher.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Hosting;
 
-// Create the host with default configuration setup
-var host = Host.CreateDefaultBuilder(args)
-    .ConfigureAppConfiguration((context, config) =>
-    {
-        // Add JSON configuration file (required)
-        config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-        // Add user secrets for sensitive configuration
-        config.AddUserSecrets<Program>();
-    })
-    .ConfigureServices((hostContext, services) =>
-    {
-        // Configure ImageDuplicationOptions from configuration
-        services.Configure<ImageDuplicationOptions>(hostContext.Configuration.GetSection(ImageDuplicationOptions.Section));
-    })
-    .Build();
+HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-// Placeholder: Configuration is now available via host.Services.GetRequiredService<IConfiguration>()
-Console.WriteLine("Configuration loaded successfully.");
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddUserSecrets<Program>();
+
+builder.Services.ConfigureServices(builder.Configuration);
+
+using IHost host = builder.Build();
 
 // Demonstrate direct options access
-var options = host.Services.GetRequiredService<IOptions<ImageDuplicationOptions>>().Value;
-Console.WriteLine($"Direct options: Image directory = {options.ImageDirectory}, Thumbnail size = {options.ThumbnailSize}");
 
-await host.RunAsync();
+var workflowService = host.Services.GetRequiredService<WorkflowService>();
+
+workflowService.ExecuteWorkflow();

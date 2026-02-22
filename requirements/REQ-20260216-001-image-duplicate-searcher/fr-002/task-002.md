@@ -1,13 +1,13 @@
-# Task 002 — Update appsettings.json for Multiple Directories
+# Task 002 — Implement Directory Scanning Logic
 
 # Description
-Update appsettings.json to configure an array of image directories under ImageDuplicationOptions.ImageDirectories instead of the single ImageDirectory string.
+Implement the ScanDirectory method in ImageProcessor to scan the configured directory and filter image files by supported extensions.
 
 # Deliverable
-Updated appsettings.json with ImageDirectories as an array.
+ScanDirectory method that uses Directory.EnumerateFiles and filters based on SupportedFormats.
 
 # Dependencies
 Task 001
 
 # Implementation Notes
-Use an array like ["./images", "./photos"] for example. Ensure it matches the new property name.
+Use case-insensitive comparison for extensions. Ensure the directory exists before scanning.

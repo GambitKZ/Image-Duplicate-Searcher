@@ -1,13 +1,13 @@
-# Task 001 — Update ImageDuplicationOptions for Multiple Directories
+# Task 001 — Create ImageProcessor Class
 
 # Description
-Modify the ImageDuplicationOptions class to support multiple image directories instead of a single directory. Change the ImageDirectory property to ImageDirectories as a List<string>.
+Create a new class ImageProcessor in the src folder that will handle image scanning operations.
 
 # Deliverable
-Updated ImageDuplicationOptions.cs with ImageDirectories property.
+ImageProcessor.cs file with constructor accepting IOptions<ImageDuplicationOptions> and a ScanDirectory method returning IEnumerable<string>.
 
 # Dependencies
 None
 
 # Implementation Notes
-Ensure the property is initialized as an empty list. Update XML documentation accordingly.
+The class should be placed in the src directory. Use dependency injection for options access.
