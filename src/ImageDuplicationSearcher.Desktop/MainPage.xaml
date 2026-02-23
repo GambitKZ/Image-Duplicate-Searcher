@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ImageDuplicationSearcher.Desktop.MainPage">
+
+    <ScrollView>
+        <StackLayout Padding="12" Spacing="12" Orientation="Vertical">
+            <Label Text="Image Duplicate Searcher" FontSize="20" />
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                <Button Grid.Column="0" Text="Set Image Directory" Clicked="OnSetImageDirectory" />
+                <Entry Grid.Column="1" x:Name="ImageDirectoryEntry" Placeholder="Image directory" HorizontalOptions="FillAndExpand" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                <Button Grid.Column="0" Text="Set Output File" Clicked="OnSetOutputFile" />
+                <Entry Grid.Column="1" x:Name="OutputFileEntry" Placeholder="Output file path" HorizontalOptions="FillAndExpand" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                <Label Grid.Column="0" Text="Supported Formats" VerticalOptions="Center" />
+                <Entry Grid.Column="1" x:Name="FormatsEntry" Placeholder=".jpg,.png,.bmp" HorizontalOptions="FillAndExpand" />
+            </Grid>
+
+            <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="6">
+                <Button Grid.Column="0" x:Name="StartScanButton" Text="Start Scan" Clicked="OnStartScanClicked" />
+                <Button Grid.Column="1" x:Name="CancelScanButton" Text="Cancel" Clicked="OnCancelScanClicked" IsEnabled="False" />
+            </Grid>
+
+            <Label Text="Response" FontAttributes="Bold" />
+            <Editor x:Name="ResponseEditor" AutoSize="TextChanges" IsReadOnly="True" HeightRequest="200" />
+        </StackLayout>
+    </ScrollView>
+
+</ContentPage>
