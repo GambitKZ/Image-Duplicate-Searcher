@@ -3,8 +3,6 @@ using ImageDuplicateSearcher.Application.Models;
 using ImageDuplicateSearcher.Application.Settings;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace ImageDuplicateSearcher.Application.Services;
 
@@ -32,6 +30,12 @@ public class WorkflowService
         // Determine which options to use for listing/processing
         var optionsToUse = runtimeOptions ?? _options;
 
+        // If runtime options were provided and reporter is a UI reporter, update it now
+        if (runtimeOptions != null && _reporter is UiReporter uiReporter)
+        {
+            uiReporter.UpdateOptions(runtimeOptions);
+        }
+
         IEnumerable<string> images;
         if (runtimeOptions != null)
         {
@@ -40,22 +44,33 @@ public class WorkflowService
                 throw new FileNotFoundException($"Folder {optionsToUse.ImageDirectory} is empty");
             }
 
-            images = Directory.GetFiles(optionsToUse.ImageDirectory).Where(i => optionsToUse.SupportedFormats.Contains(Path.GetExtension(i).ToLowerInvariant()));
+            images = Directory.GetFiles(optionsToUse.ImageDirectory)
+                .Where(i => optionsToUse.SupportedFormats.Contains(Path.GetExtension(i).ToLowerInvariant()));
         }
         else
         {
             images = _imageProcessor.GetImageList();
         }
 
-        var imageNumber = images.Count();
+        int imageCount;
 
-        if (progress == null)
+        if (images.TryGetNonEnumeratedCount(out var imageNumber))
         {
-            AnsiConsole.MarkupLine($"Path [green]{Markup.Escape(optionsToUse.ImageDirectory)}[/] contains [yellow]{imageNumber}[/] elements");
+            imageCount = imageNumber;
         }
         else
         {
-            progress.Report($"Path {optionsToUse.ImageDirectory} contains {imageNumber} elements");
+            imageCount = images.Count();
+        }
+
+
+        if (progress == null)
+        {
+            AnsiConsole.MarkupLine($"Path [green]{Markup.Escape(optionsToUse.ImageDirectory)}[/] contains [yellow]{imageCount}[/] elements");
+        }
+        else
+        {
+            progress.Report($"Path {optionsToUse.ImageDirectory} contains {imageCount} elements");
         }
 
         var duplicateDictionary = new Dictionary<ulong, List<ImageModel>>();
@@ -66,7 +81,7 @@ public class WorkflowService
             AnsiConsole.Progress()
                 .Start(ctx =>
                 {
-                    var task = ctx.AddTask("Processing images...", maxValue: imageNumber);
+                    var task = ctx.AddTask("Processing images...", maxValue: imageCount);
 
                     foreach (var imagePath in images)
                     {
@@ -123,15 +138,11 @@ public class WorkflowService
                 }
 
                 processed++;
-                progress.Report($"Processed {processed}/{imageNumber}: {Path.GetFileName(imagePath)}");
+                progress.Report($"Processed {processed}/{imageCount}: {Path.GetFileName(imagePath)}");
             }
         }
 
-        // If runtimeOptions provided and reporter supports runtime update, pass them through
-        if (runtimeOptions != null && _reporter is ImageDuplicateSearcher.Application.Services.UiReporter ui)
-        {
-            ui.UpdateOptions(runtimeOptions);
-        }
+        // reporter has already been updated with runtimeOptions earlier so it can report during processing.
 
         // Report duplicates (this will use the reporter implementation registered in DI)
         _reporter.ReportDuplicates(duplicateDictionary);

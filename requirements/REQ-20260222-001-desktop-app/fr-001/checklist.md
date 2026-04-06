@@ -8,7 +8,7 @@
 | 004    | Add UI-aware `IReporter` implementation             | completed    |
 | 005    | Add async entry point and cancellation to WorkflowService | completed    |
 | 006    | Wire UI to Workflow and UiReporter                 | completed    |
-| 007    | Build and smoke test on Windows                    | in progress  |
+| 007    | Build and smoke test on Windows                    | completed    |
 
 ## Next Task for Implementation
-- Task 007: Build and smoke test on Windows
+- None — all tasks completed for FR-001
