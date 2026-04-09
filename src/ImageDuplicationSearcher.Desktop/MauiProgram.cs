@@ -23,6 +23,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<IResultsLoader, ResultsLoader>();
         builder.Services.AddSingleton<IDuplicateNavigator, DuplicateNavigator>();
         builder.Services.AddSingleton<IImageDisplayManager, ImageDisplayManager>();
+        builder.Services.AddSingleton<IImageRemovalService, ImageRemovalService>();
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<AppShell>();
 

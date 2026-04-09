@@ -16,15 +16,17 @@ public partial class MainPage : ContentPage
     private readonly IResultsLoader _resultsLoader;
     private readonly IDuplicateNavigator _navigator;
     private readonly IImageDisplayManager _imageDisplayManager;
+    private readonly IImageRemovalService _imageRemovalService;
     private DuplicateSearchResult[]? _loadedResults;
     private readonly ObservableCollection<ImageTileViewModel> _tiles = new();
 
-    public MainPage(IResultsLoader resultsLoader, IDuplicateNavigator navigator, IImageDisplayManager imageDisplayManager)
+    public MainPage(IResultsLoader resultsLoader, IDuplicateNavigator navigator, IImageDisplayManager imageDisplayManager, IImageRemovalService imageRemovalService)
     {
         InitializeComponent();
         _resultsLoader = resultsLoader;
         _navigator = navigator;
         _imageDisplayManager = imageDisplayManager;
+        _imageRemovalService = imageRemovalService;
 
         // Wire navigator change notifications and UI handlers
         _navigator.PropertyChanged += Navigator_PropertyChanged;
@@ -138,7 +140,8 @@ partial class MainPage
 
             foreach (var img in images)
             {
-                _tiles.Add(new ImageTileViewModel(img.Path, img.SizeMB));
+                // Pass the source model and removal service to each tile; provide RefreshTilesAsync as the callback when an item is removed.
+                _tiles.Add(new ImageTileViewModel(img, _imageRemovalService, RefreshTilesAsync, ShowStatusAsync));
             }
         });
 
@@ -165,6 +168,29 @@ partial class MainPage
 
             NavErrorLabel.IsVisible = false;
         });
+    }
+
+    /// <summary>
+    /// Show a status or error message in the main UI.
+    /// </summary>
+    private Task ShowStatusAsync(string message, bool isError)
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (isError)
+            {
+                ErrorLabel.Text = message;
+                ErrorLabel.IsVisible = true;
+                StatusLabel.Text = "Last action failed";
+            }
+            else
+            {
+                StatusLabel.Text = message;
+                ErrorLabel.IsVisible = false;
+            }
+        });
+
+        return Task.CompletedTask;
     }
 
     private void OnPrevClicked(object? sender, EventArgs e)

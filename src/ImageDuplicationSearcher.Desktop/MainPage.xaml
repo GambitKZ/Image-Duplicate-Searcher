@@ -59,6 +59,13 @@
                                         <Label Text="{Binding Path}" LineBreakMode="TailTruncation" FontSize="12" />
                                         <Label Text="{Binding SizeMB, StringFormat='Size: {0} MB'}" FontSize="12" />
                                         <Label Text="{Binding PlaceholderReason}" TextColor="Red" FontSize="11" />
+                                        <Button Text="Remove"
+                                                Command="{Binding RemoveCommand}"
+                                                FontSize="12"
+                                                HorizontalOptions="Start"
+                                                BackgroundColor="#e74c3c"
+                                                TextColor="White"
+                                                AutomationProperties.Name="Remove image" />
                                     </StackLayout>
                                 </Frame>
                             </DataTemplate>
