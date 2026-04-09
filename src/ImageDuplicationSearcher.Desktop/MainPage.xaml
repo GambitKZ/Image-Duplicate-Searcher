@@ -39,6 +39,32 @@
                     <Label x:Name="NavErrorLabel" Grid.Column="2" TextColor="Red" IsVisible="False" VerticalOptions="Center" />
                 </Grid>
             </StackLayout>
+
+                <!-- Image Canvas Display Area -->
+                <StackLayout Spacing="8">
+                    <Label Text="Images in Group" FontAttributes="Bold" />
+                    <Label x:Name="GroupImageCountLabel" Text="Images: 0" />
+
+                    <!-- Responsive, scrollable grid of image tiles. ItemsSource will be bound in code-behind. -->
+                    <CollectionView x:Name="ImageCollectionView" SelectionMode="None" ItemsLayout="VerticalList">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout Orientation="Vertical" Span="3" />
+                        </CollectionView.ItemsLayout>
+
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Frame Padding="6" Margin="6" HasShadow="False" BorderColor="#DDDDDD">
+                                    <StackLayout>
+                                        <Image Source="{Binding Image}" Aspect="AspectFill" HeightRequest="120" />
+                                        <Label Text="{Binding Path}" LineBreakMode="TailTruncation" FontSize="12" />
+                                        <Label Text="{Binding SizeMB, StringFormat='Size: {0} MB'}" FontSize="12" />
+                                        <Label Text="{Binding PlaceholderReason}" TextColor="Red" FontSize="11" />
+                                    </StackLayout>
+                                </Frame>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </StackLayout>
         </StackLayout>
     </ScrollView>
 

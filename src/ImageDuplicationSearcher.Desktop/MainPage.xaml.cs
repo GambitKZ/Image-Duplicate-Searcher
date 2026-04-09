@@ -1,7 +1,11 @@
 using System;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
+using ImageDuplicationSearcher.Desktop.ViewModels;
 using Microsoft.Maui.Storage;
 using Microsoft.Maui.ApplicationModel;
 
@@ -11,13 +15,16 @@ public partial class MainPage : ContentPage
 {
     private readonly IResultsLoader _resultsLoader;
     private readonly IDuplicateNavigator _navigator;
+    private readonly IImageDisplayManager _imageDisplayManager;
     private DuplicateSearchResult[]? _loadedResults;
+    private readonly ObservableCollection<ImageTileViewModel> _tiles = new();
 
-    public MainPage(IResultsLoader resultsLoader, IDuplicateNavigator navigator)
+    public MainPage(IResultsLoader resultsLoader, IDuplicateNavigator navigator, IImageDisplayManager imageDisplayManager)
     {
         InitializeComponent();
         _resultsLoader = resultsLoader;
         _navigator = navigator;
+        _imageDisplayManager = imageDisplayManager;
 
         // Wire navigator change notifications and UI handlers
         _navigator.PropertyChanged += Navigator_PropertyChanged;
@@ -25,6 +32,9 @@ public partial class MainPage : ContentPage
         PrevButton.Clicked += OnPrevClicked;
         NextButton.Clicked += OnNextClicked;
         GoButton.Clicked += OnGoClicked;
+
+        // Bind collection to UI
+        ImageCollectionView.ItemsSource = _tiles;
 
         // Ensure initial UI state
         UpdateNavigationUI();
@@ -99,6 +109,44 @@ partial class MainPage
     {
         // Keep UI in sync when navigator updates
         UpdateNavigationUI();
+
+        // Refresh image tiles whenever the current group changes
+        _ = RefreshTilesAsync();
+    }
+
+    private async Task RefreshTilesAsync()
+    {
+        var group = _navigator.CurrentGroup;
+
+        if (group is null)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                _tiles.Clear();
+                GroupImageCountLabel.Text = "Images: 0";
+            });
+
+            return;
+        }
+
+        var images = group.Images?.Where(i => !i.IsDeleted).ToList() ?? new System.Collections.Generic.List<DuplicateSearchResultImage>();
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            GroupImageCountLabel.Text = $"Images: {images.Count}";
+            _tiles.Clear();
+
+            foreach (var img in images)
+            {
+                _tiles.Add(new ImageTileViewModel(img.Path, img.SizeMB));
+            }
+        });
+
+        // Load images asynchronously and populate ImageSource per tile
+        foreach (var tile in _tiles.ToList())
+        {
+            await tile.LoadAsync(_imageDisplayManager).ConfigureAwait(false);
+        }
     }
 
     private void UpdateNavigationUI()
