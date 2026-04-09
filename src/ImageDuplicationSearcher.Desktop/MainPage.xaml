@@ -24,7 +24,21 @@
             <!-- Separator -->
             <BoxView HeightRequest="1" Color="#CCCCCC" Margin="0,8" />
 
-            <!-- Removed Run Search UI per new requirements -->
+            <!-- Navigation Section -->
+            <StackLayout Spacing="8">
+                <Label Text="Navigate Duplicate Groups" FontAttributes="Bold" />
+                <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="6" Margin="0,4">
+                    <Button x:Name="PrevButton" Grid.Column="0" Text="Previous" HorizontalOptions="Start" />
+                    <Button x:Name="NextButton" Grid.Column="1" Text="Next" HorizontalOptions="Start" />
+                    <Label x:Name="SummaryLabel" Grid.Column="2" Text="0 / 0" VerticalOptions="Center" HorizontalOptions="Start" />
+                    <Label x:Name="GroupHashLabel" Grid.Column="3" Text="Hash: -" VerticalOptions="Center" HorizontalOptions="End" />
+                </Grid>
+                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" Margin="0,4">
+                    <Entry x:Name="GroupEntry" Placeholder="Group #" Keyboard="Numeric" HorizontalOptions="Start" />
+                    <Button x:Name="GoButton" Text="Go" Grid.Column="1" HorizontalOptions="Start" />
+                    <Label x:Name="NavErrorLabel" Grid.Column="2" TextColor="Red" IsVisible="False" VerticalOptions="Center" />
+                </Grid>
+            </StackLayout>
         </StackLayout>
     </ScrollView>
 

@@ -21,6 +21,7 @@ public static class MauiProgram
             options.SupportedFormats = new List<string> { ".jpeg", ".jpg", ".png", ".bmp" };
         });
         builder.Services.AddSingleton<IResultsLoader, ResultsLoader>();
+        builder.Services.AddSingleton<IDuplicateNavigator, DuplicateNavigator>();
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<AppShell>();
 

@@ -1,19 +1,33 @@
 using System;
+using System.ComponentModel;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
 using Microsoft.Maui.Storage;
+using Microsoft.Maui.ApplicationModel;
 
 namespace ImageDuplicationSearcher.Desktop;
 
 public partial class MainPage : ContentPage
 {
     private readonly IResultsLoader _resultsLoader;
+    private readonly IDuplicateNavigator _navigator;
     private DuplicateSearchResult[]? _loadedResults;
 
-    public MainPage(IResultsLoader resultsLoader)
+    public MainPage(IResultsLoader resultsLoader, IDuplicateNavigator navigator)
     {
         InitializeComponent();
         _resultsLoader = resultsLoader;
+        _navigator = navigator;
+
+        // Wire navigator change notifications and UI handlers
+        _navigator.PropertyChanged += Navigator_PropertyChanged;
+
+        PrevButton.Clicked += OnPrevClicked;
+        NextButton.Clicked += OnNextClicked;
+        GoButton.Clicked += OnGoClicked;
+
+        // Ensure initial UI state
+        UpdateNavigationUI();
     }
 
     /// <summary>
@@ -45,6 +59,11 @@ public partial class MainPage : ContentPage
                 _loadedResults = results;
                 ResultsFileEntry.Text = filePath;
                 StatusLabel.Text = $"Loaded: {_loadedResults.Length} groups";
+
+                // Initialize navigator with loaded results so UI navigation becomes available
+                _navigator.Initialize(results);
+                UpdateNavigationUI();
+
                 await DisplayAlertAsync("Results Loaded", $"{_loadedResults.Length} duplicate groups found.", "OK");
             }
             catch (FileNotFoundException ex)
@@ -70,5 +89,64 @@ public partial class MainPage : ContentPage
         {
             await DisplayAlertAsync("Error", ex.Message, "OK");
         }
+    }
+}
+
+// UI helpers and event handlers
+partial class MainPage
+{
+    private void Navigator_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Keep UI in sync when navigator updates
+        UpdateNavigationUI();
+    }
+
+    private void UpdateNavigationUI()
+    {
+        // Ensure UI updates run on the main thread.
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            int current = _navigator.CurrentIndex >= 0 ? _navigator.CurrentIndex + 1 : 0;
+            SummaryLabel.Text = $"{current} / {_navigator.TotalCount}";
+
+            var group = _navigator.CurrentGroup;
+            GroupHashLabel.Text = group is null ? "Hash: -" : $"Hash: {group.Hash}";
+
+            PrevButton.IsEnabled = _navigator.CanMovePrevious;
+            NextButton.IsEnabled = _navigator.CanMoveNext;
+
+            NavErrorLabel.IsVisible = false;
+        });
+    }
+
+    private void OnPrevClicked(object? sender, EventArgs e)
+    {
+        _navigator.Previous();
+    }
+
+    private void OnNextClicked(object? sender, EventArgs e)
+    {
+        _navigator.Next();
+    }
+
+    private void OnGoClicked(object? sender, EventArgs e)
+    {
+        NavErrorLabel.IsVisible = false;
+
+        if (string.IsNullOrWhiteSpace(GroupEntry.Text) || !int.TryParse(GroupEntry.Text.Trim(), out var displayIndex))
+        {
+            NavErrorLabel.Text = "Enter a valid group number.";
+            NavErrorLabel.IsVisible = true;
+            return;
+        }
+
+        if (!_navigator.TryGoToGroup(displayIndex))
+        {
+            NavErrorLabel.Text = $"Group must be between 1 and {_navigator.TotalCount}.";
+            NavErrorLabel.IsVisible = true;
+            return;
+        }
+
+        // success — UI will update via PropertyChanged handler
     }
 }
