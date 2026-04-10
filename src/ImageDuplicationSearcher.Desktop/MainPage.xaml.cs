@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
 using ImageDuplicationSearcher.Desktop.ViewModels;
+using ImageDuplicationSearcher.Desktop.Services;
 using Microsoft.Maui.Storage;
 using Microsoft.Maui.ApplicationModel;
 
@@ -17,16 +18,18 @@ public partial class MainPage : ContentPage
     private readonly IDuplicateNavigator _navigator;
     private readonly IImageDisplayManager _imageDisplayManager;
     private readonly IImageRemovalService _imageRemovalService;
+    private readonly IPlatformFileService _platformFileService;
     private DuplicateSearchResult[]? _loadedResults;
     private readonly ObservableCollection<ImageTileViewModel> _tiles = new();
 
-    public MainPage(IResultsLoader resultsLoader, IDuplicateNavigator navigator, IImageDisplayManager imageDisplayManager, IImageRemovalService imageRemovalService)
+    public MainPage(IResultsLoader resultsLoader, IDuplicateNavigator navigator, IImageDisplayManager imageDisplayManager, IImageRemovalService imageRemovalService, IPlatformFileService platformFileService)
     {
         InitializeComponent();
         _resultsLoader = resultsLoader;
         _navigator = navigator;
         _imageDisplayManager = imageDisplayManager;
         _imageRemovalService = imageRemovalService;
+        _platformFileService = platformFileService;
 
         // Wire navigator change notifications and UI handlers
         _navigator.PropertyChanged += Navigator_PropertyChanged;
@@ -49,17 +52,28 @@ public partial class MainPage : ContentPage
     {
         try
         {
-            var result = await FilePicker.PickAsync(new PickOptions
+            // Ensure any platform-specific read permission is available (Android may request runtime permission)
+            try
             {
-                PickerTitle = "Select JSON Results File"
-            });
+                var perm = await _platformFileService.EnsureReadPermissionAsync();
+                if (!perm)
+                {
+                    await ShowStatusAsync("Permission denied for file access.", true);
+                    return;
+                }
+            }
+            catch
+            {
+                // Ignore permission helper failures and proceed to picker — picker may still succeed.
+            }
 
-            if (result is null)
+            var pick = await _platformFileService.PickJsonFileAsync();
+            if (pick is null || string.IsNullOrWhiteSpace(pick.Path))
             {
                 return;
             }
 
-            var filePath = result.FullPath;
+            var filePath = pick.Path;
 
             // Show transient loading state and clear previous error
             StatusLabel.Text = "Loading...";
@@ -133,17 +147,17 @@ partial class MainPage
 
         var images = group.Images?.Where(i => !i.IsDeleted).ToList() ?? new System.Collections.Generic.List<DuplicateSearchResultImage>();
 
-        MainThread.BeginInvokeOnMainThread(() =>
-        {
-            GroupImageCountLabel.Text = $"Images: {images.Count}";
-            _tiles.Clear();
-
-            foreach (var img in images)
+            MainThread.BeginInvokeOnMainThread(() =>
             {
-                // Pass the source model and removal service to each tile; provide RefreshTilesAsync as the callback when an item is removed.
-                _tiles.Add(new ImageTileViewModel(img, _imageRemovalService, RefreshTilesAsync, ShowStatusAsync));
-            }
-        });
+                GroupImageCountLabel.Text = $"Images: {images.Count}";
+                _tiles.Clear();
+
+                foreach (var img in images)
+                {
+                    // Pass the source model, removal service and platform adapter to each tile; provide RefreshTilesAsync as the callback when an item is removed.
+                    _tiles.Add(new ImageTileViewModel(img, _imageRemovalService, RefreshTilesAsync, ShowStatusAsync, _platformFileService));
+                }
+            });
 
         // Load images asynchronously and populate ImageSource per tile
         foreach (var tile in _tiles.ToList())

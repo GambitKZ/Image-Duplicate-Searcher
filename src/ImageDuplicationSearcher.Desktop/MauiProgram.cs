@@ -3,6 +3,7 @@ using ImageDuplicationSearcher.Desktop;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Services;
 using ImageDuplicateSearcher.Application.Settings;
+using ImageDuplicationSearcher.Desktop.Services;
 
 public static class MauiProgram
 {
@@ -24,6 +25,12 @@ public static class MauiProgram
         builder.Services.AddSingleton<IDuplicateNavigator, DuplicateNavigator>();
         builder.Services.AddSingleton<IImageDisplayManager, ImageDisplayManager>();
         builder.Services.AddSingleton<IImageRemovalService, ImageRemovalService>();
+
+    #if ANDROID
+        builder.Services.AddTransient<IPlatformFileService, AndroidPlatformFileService>();
+    #else
+        builder.Services.AddTransient<IPlatformFileService, WindowsPlatformFileService>();
+    #endif
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<AppShell>();
 

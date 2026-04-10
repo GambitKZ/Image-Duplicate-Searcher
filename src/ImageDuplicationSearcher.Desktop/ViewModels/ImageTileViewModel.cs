@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.ApplicationModel;
+using ImageDuplicationSearcher.Desktop.Services;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
 
@@ -24,6 +25,7 @@ public class ImageTileViewModel : INotifyPropertyChanged
     private readonly IImageRemovalService? _removalService;
     private readonly Func<Task>? _onRemoved;
     private readonly Func<string, bool, Task>? _reportStatus;
+    private readonly IPlatformFileService? _platformFileService;
     private bool _isDeleted;
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -37,12 +39,13 @@ public class ImageTileViewModel : INotifyPropertyChanged
     /// <summary>
     /// Construct a tile bound to an application source model and a removal service.
     /// </summary>
-    public ImageTileViewModel(DuplicateSearchResultImage source, IImageRemovalService removalService, Func<Task>? onRemoved = null, Func<string, bool, Task>? reportStatus = null)
+    public ImageTileViewModel(DuplicateSearchResultImage source, IImageRemovalService removalService, Func<Task>? onRemoved = null, Func<string, bool, Task>? reportStatus = null, IPlatformFileService? platformFileService = null)
     {
         _sourceImage = source ?? throw new ArgumentNullException(nameof(source));
         _removalService = removalService ?? throw new ArgumentNullException(nameof(removalService));
         _onRemoved = onRemoved;
         _reportStatus = reportStatus;
+        _platformFileService = platformFileService;
 
         Path = source.Path;
         SizeMB = source.SizeMB;
@@ -183,6 +186,30 @@ public class ImageTileViewModel : INotifyPropertyChanged
                 break;
 
             case RemovalResult.NotFound:
+                // Attempt platform-specific deletion (e.g., Android content:// URI) as a fallback
+                if (_platformFileService is not null)
+                {
+                    try
+                    {
+                        var deleted = await _platformFileService.TryDeleteOriginalAsync(_sourceImage.Path).ConfigureAwait(false);
+                        if (deleted)
+                        {
+                            _sourceImage.IsDeleted = true;
+                            MainThread.BeginInvokeOnMainThread(() =>
+                            {
+                                IsDeleted = true;
+                                _ = _reportStatus?.Invoke("Image removed successfully", false);
+                                _ = _onRemoved?.Invoke();
+                            });
+                            break;
+                        }
+                    }
+                    catch
+                    {
+                        // ignore and fall back to not-found handling
+                    }
+                }
+
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
                     IsPlaceholder = true;
