@@ -7,7 +7,7 @@ public partial class AppShell : Shell
         InitializeComponent();
         Items.Add(new ShellContent
         {
-            Title = "Home",
+            Title = string.Empty,
             Route = nameof(MainPage),
             Content = mainPage
         });

@@ -1,218 +1,238 @@
-﻿using CommunityToolkit.Maui.Storage;
-using ImageDuplicateSearcher.Application.Services;
-using ImageDuplicateSearcher.Application.Settings;
-using Microsoft.Extensions.Options;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using ImageDuplicateSearcher.Application.Interfaces;
+using ImageDuplicateSearcher.Application.Models;
+using ImageDuplicationSearcher.Desktop.Services;
+using ImageDuplicationSearcher.Desktop.ViewModels;
 
 namespace ImageDuplicationSearcher.Desktop;
 
 public partial class MainPage : ContentPage
 {
-    private readonly IFolderPicker _folderPicker;
-    private readonly WorkflowService _workflowService;
-    private readonly UiReporter _reporter;
-    private readonly ImageDuplicationOptions _runtimeOptions;
-    private readonly IReadOnlyList<string> _defaultFormats;
-    private CancellationTokenSource? _cts;
+    private readonly IResultsLoader _resultsLoader;
+    private readonly IDuplicateNavigator _navigator;
+    private readonly IImageDisplayManager _imageDisplayManager;
+    private readonly IImageRemovalService _imageRemovalService;
+    private readonly IPlatformFileService _platformFileService;
+    private DuplicateSearchResult[]? _loadedResults;
+    private readonly ObservableCollection<ImageTileViewModel> _tiles = new();
 
-    /// <summary>
-    /// Initializes the main page and seeds the UI with default runtime settings.
-    /// </summary>
-    public MainPage(
-        IFolderPicker folderPicker,
-        WorkflowService workflowService,
-        UiReporter reporter,
-        IOptions<ImageDuplicationOptions> options)
+    public MainPage(IResultsLoader resultsLoader, IDuplicateNavigator navigator, IImageDisplayManager imageDisplayManager, IImageRemovalService imageRemovalService, IPlatformFileService platformFileService)
     {
         InitializeComponent();
-        _folderPicker = folderPicker;
-        _workflowService = workflowService;
-        _reporter = reporter;
+        _resultsLoader = resultsLoader;
+        _navigator = navigator;
+        _imageDisplayManager = imageDisplayManager;
+        _imageRemovalService = imageRemovalService;
+        _platformFileService = platformFileService;
 
-        var configured = options.Value;
-        _defaultFormats = configured.SupportedFormats.Count > 0
-            ? configured.SupportedFormats.ToList()
-            : new List<string> { ".jpeg", ".jpg", ".png", ".bmp" };
+        // Wire navigator change notifications and UI handlers
+        _navigator.PropertyChanged += Navigator_PropertyChanged;
 
-        _runtimeOptions = new ImageDuplicationOptions
-        {
-            ImageDirectory = configured.ImageDirectory,
-            OutputFilePath = configured.OutputFilePath,
-            SupportedFormats = _defaultFormats.ToList()
-        };
+        PrevButton.Clicked += OnPrevClicked;
+        NextButton.Clicked += OnNextClicked;
+        GoButton.Clicked += OnGoClicked;
 
-        _reporter.OnLogMessage += AppendResponse;
+        // Bind collection to UI
+        ImageCollectionView.ItemsSource = _tiles;
 
-        ImageDirectoryEntry.Text = _runtimeOptions.ImageDirectory;
-        OutputFileEntry.Text = _runtimeOptions.OutputFilePath;
-        FormatsEntry.Text = string.Join(';', _runtimeOptions.SupportedFormats);
+        // Ensure initial UI state
+        UpdateNavigationUI();
     }
 
     /// <summary>
-    /// Opens a folder picker and updates the image directory.
+    /// Opens a file picker to select a JSON results file and loads it using the ResultsLoader service.
     /// </summary>
-    private async void OnSetImageDirectory(object? sender, EventArgs e)
+    private async void OnOpenJsonResults(object? sender, EventArgs e)
     {
         try
         {
-            var result = await _folderPicker.PickAsync();
-            if (result.IsSuccessful)
+            // Ensure any platform-specific read permission is available (Android may request runtime permission)
+            try
             {
-                ImageDirectoryEntry.Text = result.Folder.Path;
-                _runtimeOptions.ImageDirectory = result.Folder.Path;
+                var perm = await _platformFileService.EnsureReadPermissionAsync();
+                if (!perm)
+                {
+                    await ShowStatusAsync("Permission denied for file access.", true);
+                    return;
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            AppendResponse($"Error selecting directory: {ex.Message}");
-        }
-    }
+            catch
+            {
+                // Ignore permission helper failures and proceed to picker — picker may still succeed.
+            }
 
-    /// <summary>
-    /// Picks a folder and creates an output file path inside it.
-    /// </summary>
-    private async void OnSetOutputFile(object? sender, EventArgs e)
-    {
-        try
-        {
-            var result = await _folderPicker.PickAsync();
-            if (!result.IsSuccessful)
+            var pick = await _platformFileService.PickJsonFileAsync();
+            if (pick is null || string.IsNullOrWhiteSpace(pick.Path))
             {
                 return;
             }
 
-            var currentName = Path.GetFileName(OutputFileEntry.Text);
-            if (string.IsNullOrWhiteSpace(currentName))
+            var filePath = pick.Path;
+
+            // Show transient loading state and clear previous error
+            StatusLabel.Text = "Loading...";
+            ErrorLabel.IsVisible = false;
+
+            try
             {
-                currentName = "duplicates.json";
+                var results = await _resultsLoader.LoadResultsAsync(filePath);
+                _loadedResults = results;
+                ResultsFileEntry.Text = filePath;
+                StatusLabel.Text = $"Loaded: {_loadedResults.Length} groups";
+
+                // Initialize navigator with loaded results so UI navigation becomes available
+                _navigator.Initialize(results);
+                UpdateNavigationUI();
+
+                await DisplayAlertAsync("Results Loaded", $"{_loadedResults.Length} duplicate groups found.", "OK");
+
+                LoadResultsSection.IsVisible = false;
+                ProcessingSection.IsVisible = true;
             }
-
-            var outputPath = Path.Combine(result.Folder.Path, currentName);
-            OutputFileEntry.Text = outputPath;
-            _runtimeOptions.OutputFilePath = outputPath;
+            catch (FileNotFoundException ex)
+            {
+                StatusLabel.Text = "Load failed";
+                ErrorLabel.Text = $"File not found: {ex.Message}";
+                ErrorLabel.IsVisible = true;
+            }
+            catch (InvalidOperationException ex)
+            {
+                StatusLabel.Text = "Load failed";
+                ErrorLabel.Text = $"Invalid JSON: {ex.Message}";
+                ErrorLabel.IsVisible = true;
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                StatusLabel.Text = "Load failed";
+                ErrorLabel.Text = $"JSON parsing error: {ex.Message}";
+                ErrorLabel.IsVisible = true;
+            }
         }
         catch (Exception ex)
         {
-            AppendResponse($"Error selecting output path: {ex.Message}");
+            await DisplayAlertAsync("Error", ex.Message, "OK");
         }
     }
+}
 
-    /// <summary>
-    /// Starts duplicate detection with current runtime options.
-    /// </summary>
-    private async void OnStartScanClicked(object? sender, EventArgs e)
+// UI helpers and event handlers
+partial class MainPage
+{
+    private void Navigator_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (_cts is not null)
+        // Keep UI in sync when navigator updates
+        UpdateNavigationUI();
+
+        // Refresh image tiles whenever the current group changes
+        _ = RefreshTilesAsync();
+    }
+
+    private async Task RefreshTilesAsync()
+    {
+        var group = _navigator.CurrentGroup;
+
+        if (group is null)
         {
-            AppendResponse("A scan is already running.");
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                _tiles.Clear();
+                GroupImageCountLabel.Text = "Images: 0";
+            });
+
             return;
         }
 
-        if (!TryUpdateRuntimeOptions(out var validationError))
-        {
-            AppendResponse(validationError);
-            return;
-        }
+        var images = group.Images?.Where(i => !i.IsDeleted).ToList() ?? new System.Collections.Generic.List<DuplicateSearchResultImage>();
 
-        _cts = new CancellationTokenSource();
-        SetScanButtons(isRunning: true);
-        AppendResponse("Starting scan...");
-
-        try
-        {
-            var progress = new Progress<string>(AppendResponse);
-
-            await Task.Run(() => _workflowService.ExecuteWorkflowAsync(_runtimeOptions, progress, _cts.Token));
-            AppendResponse("Scan completed.");
-        }
-        catch (OperationCanceledException)
-        {
-            AppendResponse("Scan cancelled.");
-        }
-        catch (Exception ex)
-        {
-            AppendResponse($"Scan failed: {ex.Message}");
-        }
-        finally
-        {
-            _cts.Dispose();
-            _cts = null;
-            SetScanButtons(isRunning: false);
-        }
-    }
-
-    /// <summary>
-    /// Requests cancellation for the currently running scan.
-    /// </summary>
-    private void OnCancelScanClicked(object? sender, EventArgs e)
-    {
-        _cts?.Cancel();
-    }
-
-    /// <summary>
-    /// Validates and applies values from UI controls to runtime options.
-    /// </summary>
-    private bool TryUpdateRuntimeOptions(out string validationError)
-    {
-        validationError = string.Empty;
-
-        var imageDirectory = ImageDirectoryEntry.Text?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(imageDirectory))
-        {
-            validationError = "Image directory is required.";
-            return false;
-        }
-
-        var outputPath = OutputFileEntry.Text?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(outputPath))
-        {
-            validationError = "Output file path is required.";
-            return false;
-        }
-
-        _runtimeOptions.ImageDirectory = imageDirectory;
-        _runtimeOptions.OutputFilePath = outputPath;
-
-        _runtimeOptions.SetSupportedFormatsFromString(FormatsEntry.Text);
-        if (_runtimeOptions.SupportedFormats.Count == 0)
-        {
-            _runtimeOptions.SupportedFormats = _defaultFormats.ToList();
-        }
-
-        return true;
-    }
-
-    /// <summary>
-    /// Toggles start/cancel button state while scan is running.
-    /// </summary>
-    private void SetScanButtons(bool isRunning)
-    {
-        StartScanButton.IsEnabled = !isRunning;
-        CancelScanButton.IsEnabled = isRunning;
-    }
-
-    /// <summary>
-    /// Appends a status line to the response editor from any thread.
-    /// </summary>
-    private void AppendResponse(string message)
-    {
         MainThread.BeginInvokeOnMainThread(() =>
         {
-            if (string.IsNullOrWhiteSpace(ResponseEditor.Text))
-            {
-                ResponseEditor.Text = message;
-                return;
-            }
+            GroupImageCountLabel.Text = $"Images: {images.Count}";
+            _tiles.Clear();
 
-            ResponseEditor.Text += Environment.NewLine + message;
+            foreach (var img in images)
+            {
+                // Pass the source model, removal service and platform adapter to each tile; provide RefreshTilesAsync as the callback when an item is removed.
+                _tiles.Add(new ImageTileViewModel(img, _imageRemovalService, RefreshTilesAsync, ShowStatusAsync, _platformFileService));
+            }
+        });
+
+        // Load images asynchronously and populate ImageSource per tile
+        foreach (var tile in _tiles.ToList())
+        {
+            await tile.LoadAsync(_imageDisplayManager).ConfigureAwait(false);
+        }
+    }
+
+    private void UpdateNavigationUI()
+    {
+        // Ensure UI updates run on the main thread.
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            int current = _navigator.CurrentIndex >= 0 ? _navigator.CurrentIndex + 1 : 0;
+            SummaryLabel.Text = $"{current} / {_navigator.TotalCount}";
+
+            var group = _navigator.CurrentGroup;
+            GroupHashLabel.Text = group is null ? "Hash: -" : $"Hash: {group.Hash}";
+
+            PrevButton.IsEnabled = _navigator.CanMovePrevious;
+            NextButton.IsEnabled = _navigator.CanMoveNext;
+
+            NavErrorLabel.IsVisible = false;
         });
     }
 
     /// <summary>
-    /// Unsubscribes from reporter events when the page is removed.
+    /// Show a status or error message in the main UI.
     /// </summary>
-    protected override void OnDisappearing()
+    private Task ShowStatusAsync(string message, bool isError)
     {
-        _reporter.OnLogMessage -= AppendResponse;
-        base.OnDisappearing();
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (isError)
+            {
+                ErrorLabel.Text = message;
+                ErrorLabel.IsVisible = true;
+                StatusLabel.Text = "Last action failed";
+            }
+            else
+            {
+                StatusLabel.Text = message;
+                ErrorLabel.IsVisible = false;
+            }
+        });
+
+        return Task.CompletedTask;
+    }
+
+    private void OnPrevClicked(object? sender, EventArgs e)
+    {
+        _navigator.Previous();
+    }
+
+    private void OnNextClicked(object? sender, EventArgs e)
+    {
+        _navigator.Next();
+    }
+
+    private void OnGoClicked(object? sender, EventArgs e)
+    {
+        NavErrorLabel.IsVisible = false;
+
+        if (string.IsNullOrWhiteSpace(GroupEntry.Text) || !int.TryParse(GroupEntry.Text.Trim(), out var displayIndex))
+        {
+            NavErrorLabel.Text = "Enter a valid group number.";
+            NavErrorLabel.IsVisible = true;
+            return;
+        }
+
+        if (!_navigator.TryGoToGroup(displayIndex))
+        {
+            NavErrorLabel.Text = $"Group must be between 1 and {_navigator.TotalCount}.";
+            NavErrorLabel.IsVisible = true;
+            return;
+        }
+
+        // success — UI will update via PropertyChanged handler
     }
 }
