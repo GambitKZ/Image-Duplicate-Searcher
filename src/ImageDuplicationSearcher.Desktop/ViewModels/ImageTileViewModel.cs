@@ -1,12 +1,8 @@
-using System.ComponentModel;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using System.Windows.Input;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.ApplicationModel;
-using ImageDuplicationSearcher.Desktop.Services;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
+using ImageDuplicationSearcher.Desktop.Services;
 
 namespace ImageDuplicationSearcher.Desktop.ViewModels;
 
@@ -179,9 +175,9 @@ public class ImageTileViewModel : INotifyPropertyChanged
                 _sourceImage.IsDeleted = true;
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                        IsDeleted = true;
-                        _ = _reportStatus?.Invoke("Image removed successfully", false);
-                        _ = _onRemoved?.Invoke();
+                    IsDeleted = true;
+                    _ = _reportStatus?.Invoke("Image removed successfully", false);
+                    _ = _onRemoved?.Invoke();
                 });
                 break;
 

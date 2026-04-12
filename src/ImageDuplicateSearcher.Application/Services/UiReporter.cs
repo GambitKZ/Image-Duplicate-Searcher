@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
 using ImageDuplicateSearcher.Application.Settings;

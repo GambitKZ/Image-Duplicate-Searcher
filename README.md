@@ -6,6 +6,8 @@ Image Duplicate Searcher is a .NET console application designed to identify dupl
 
 The application processes images by generating thumbnails, computing perceptual hashes, and grouping images with identical hashes. Results are displayed in the console and saved to a JSON file for further analysis.
 
+Then there is UI application that process the duplications and allow to remove unnecessary "copies".
+
 ## Features
 
 - **Perceptual Hashing**: Uses advanced hashing to detect visually identical images.
@@ -23,9 +25,12 @@ The application processes images by generating thumbnails, computing perceptual 
 
 1. Ensure you have .NET 10.0 installed.
 2. Clone or download the project to your local machine.
-3. Navigate to the `src` directory.
 
 ## Usage
+
+### Duplicate Searcher
+
+
 
 1. **Configure the Application**:
    - Open `appsettings.json` in the `src` directory.
@@ -56,6 +61,7 @@ The application processes images by generating thumbnails, computing perceptual 
 3. **Hash Computation**: A perceptual hash is computed for each thumbnail.
 4. **Grouping**: Images with identical hashes are grouped as duplicates.
 5. **Reporting**: Duplicates are reported to the console and exported to JSON.
+6. **Processing**: Report is processed and shows the duplicate images, where you can remove unnecessary images.
 
 ## Configuration Options
 
@@ -87,6 +93,9 @@ Example JSON output:
   }
 ]
 ```
+
+- **Desktop**: Open result and helps to manage duplications
+![DesktopScreen](./documentations/DesktopScreen.jpg)
 
 ## Troubleshooting
 

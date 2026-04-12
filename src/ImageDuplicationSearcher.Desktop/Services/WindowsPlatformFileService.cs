@@ -1,9 +1,4 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.Maui.Storage;
-
-namespace ImageDuplicationSearcher.Desktop.Services;
+﻿namespace ImageDuplicationSearcher.Desktop.Services;
 
 /// <summary>
 /// Windows implementation of <see cref="IPlatformFileService"/>.

@@ -1,8 +1,7 @@
-using System;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.Runtime.InteropServices;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
+using Microsoft.VisualBasic.FileIO;
 
 namespace ImageDuplicateSearcher.Application.Services;
 
@@ -27,7 +26,20 @@ public class ImageRemovalService : IImageRemovalService
                 return RemovalResult.NotFound;
             }
 
-            // Perform the delete on a background thread to avoid blocking callers.
+            // For Windows send to REcycle Bin, for other OSes perform direct deletion.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                await Task.Run(() =>
+                    FileSystem.DeleteFile(path,
+                        UIOption.OnlyErrorDialogs,
+                        RecycleOption.SendToRecycleBin)
+                ).ConfigureAwait(false);
+            }
+            else
+            {
+                await Task.Run(() => File.Delete(path)).ConfigureAwait(false);
+            }
+
             await Task.Run(() => File.Delete(path)).ConfigureAwait(false);
 
             return RemovalResult.Success;

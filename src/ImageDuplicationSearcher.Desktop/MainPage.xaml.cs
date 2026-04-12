@@ -1,14 +1,9 @@
-using System;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
-using ImageDuplicationSearcher.Desktop.ViewModels;
 using ImageDuplicationSearcher.Desktop.Services;
-using Microsoft.Maui.Storage;
-using Microsoft.Maui.ApplicationModel;
+using ImageDuplicationSearcher.Desktop.ViewModels;
 
 namespace ImageDuplicationSearcher.Desktop;
 
@@ -91,6 +86,9 @@ public partial class MainPage : ContentPage
                 UpdateNavigationUI();
 
                 await DisplayAlertAsync("Results Loaded", $"{_loadedResults.Length} duplicate groups found.", "OK");
+
+                LoadResultsSection.IsVisible = false;
+                ProcessingSection.IsVisible = true;
             }
             catch (FileNotFoundException ex)
             {
@@ -147,17 +145,17 @@ partial class MainPage
 
         var images = group.Images?.Where(i => !i.IsDeleted).ToList() ?? new System.Collections.Generic.List<DuplicateSearchResultImage>();
 
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                GroupImageCountLabel.Text = $"Images: {images.Count}";
-                _tiles.Clear();
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            GroupImageCountLabel.Text = $"Images: {images.Count}";
+            _tiles.Clear();
 
-                foreach (var img in images)
-                {
-                    // Pass the source model, removal service and platform adapter to each tile; provide RefreshTilesAsync as the callback when an item is removed.
-                    _tiles.Add(new ImageTileViewModel(img, _imageRemovalService, RefreshTilesAsync, ShowStatusAsync, _platformFileService));
-                }
-            });
+            foreach (var img in images)
+            {
+                // Pass the source model, removal service and platform adapter to each tile; provide RefreshTilesAsync as the callback when an item is removed.
+                _tiles.Add(new ImageTileViewModel(img, _imageRemovalService, RefreshTilesAsync, ShowStatusAsync, _platformFileService));
+            }
+        });
 
         // Load images asynchronously and populate ImageSource per tile
         foreach (var tile in _tiles.ToList())

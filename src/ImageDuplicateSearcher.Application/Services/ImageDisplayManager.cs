@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Threading.Tasks;
+﻿using System.Collections.Concurrent;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
 using ImageDuplicateSearcher.Application.Resources;
 using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace ImageDuplicateSearcher.Application.Services;
 
@@ -114,6 +110,4 @@ public class ImageDisplayManager : IImageDisplayManager
             return false;
         }
     }
-
-    
 }

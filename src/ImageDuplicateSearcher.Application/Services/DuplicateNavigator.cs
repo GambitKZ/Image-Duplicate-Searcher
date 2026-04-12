@@ -1,5 +1,4 @@
-using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using ImageDuplicateSearcher.Application.Interfaces;
 using ImageDuplicateSearcher.Application.Models;
 
