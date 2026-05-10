@@ -39,7 +39,6 @@ public partial class MainPage : ContentPage
 
         PrevButton.Clicked += OnPrevClicked;
         NextButton.Clicked += OnNextClicked;
-        GoButton.Clicked += OnGoClicked;
 
         // Bind collection to UI
         ImageCollectionView.ItemsSource = _tiles;
@@ -183,7 +182,8 @@ partial class MainPage
         MainThread.BeginInvokeOnMainThread(() =>
         {
             int current = _navigator.CurrentIndex >= 0 ? _navigator.CurrentIndex + 1 : 0;
-            SummaryLabel.Text = $"{current} / {_navigator.TotalCount}";
+            SummaryLabel.Text = $"/{_navigator.TotalCount}";
+            GroupEntry.Text = current.ToString();
 
             var group = _navigator.CurrentGroup;
             GroupHashLabel.Text = group is null ? "Hash: -" : $"Hash: {group.Hash}";
