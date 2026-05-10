@@ -9,6 +9,14 @@ namespace ImageDuplicationSearcher.Desktop;
 
 public partial class MainPage : ContentPage
 {
+    public static readonly BindableProperty GroupImageHeightProperty = BindableProperty.Create(nameof(GroupImageHeight), typeof(double), typeof(MainPage), 120.0);
+
+    public double GroupImageHeight
+    {
+        get => (double)GetValue(GroupImageHeightProperty);
+        set => SetValue(GroupImageHeightProperty, value);
+    }
+
     private readonly IResultsLoader _resultsLoader;
     private readonly IDuplicateNavigator _navigator;
     private readonly IImageDisplayManager _imageDisplayManager;
@@ -35,6 +43,7 @@ public partial class MainPage : ContentPage
 
         // Bind collection to UI
         ImageCollectionView.ItemsSource = _tiles;
+        ImageCollectionView.SizeChanged += OnImageCollectionViewSizeChanged;
 
         // Ensure initial UI state
         UpdateNavigationUI();
@@ -162,6 +171,10 @@ partial class MainPage
         {
             await tile.LoadAsync(_imageDisplayManager).ConfigureAwait(false);
         }
+
+        // Once images are loaded, compute a preferred height for the image tiles
+        // (uses the first non-placeholder image in the group as a reference).
+        ComputeGroupImageHeight();
     }
 
     private void UpdateNavigationUI()
@@ -234,5 +247,37 @@ partial class MainPage
         }
 
         // success — UI will update via PropertyChanged handler
+    }
+
+    private void OnImageCollectionViewSizeChanged(object? sender, EventArgs e)
+    {
+        ComputeGroupImageHeight();
+    }
+
+    private void ComputeGroupImageHeight()
+    {
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            if (_tiles.Count == 0) return;
+
+            var first = _tiles.FirstOrDefault(t => t.SourceWidth > 0 && t.SourceHeight > 0);
+            if (first is null) return;
+
+            double collectionWidth = ImageCollectionView.Width;
+            if (collectionWidth <= 0) return;
+
+            var layout = ImageCollectionView.ItemsLayout as Microsoft.Maui.Controls.GridItemsLayout;
+            var span = layout?.Span ?? 3;
+
+            // Account for container padding and per-frame horizontal margins.
+            const double containerHorizontalPadding = 24.0; // StackLayout Padding=12 on left+right
+            const double frameHorizontalMargin = 12.0; // Frame.Margin="6" -> 6 left + 6 right
+
+            double availableWidth = Math.Max(10.0, (collectionWidth - containerHorizontalPadding - (span * frameHorizontalMargin)) / span);
+
+            double computedHeight = Math.Round(availableWidth * ((double)first.SourceHeight / first.SourceWidth));
+
+            GroupImageHeight = computedHeight;
+        });
     }
 }

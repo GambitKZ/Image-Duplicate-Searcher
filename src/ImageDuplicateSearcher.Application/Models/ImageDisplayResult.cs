@@ -21,4 +21,14 @@ public sealed record ImageDisplayResult
     /// Optional short reason describing why a placeholder was returned (for example "Missing file" or "Unreadable image").
     /// </summary>
     public string? Reason { get; init; }
+
+    /// <summary>
+    /// Width in pixels of the returned image bytes.
+    /// </summary>
+    public required int Width { get; init; }
+
+    /// <summary>
+    /// Height in pixels of the returned image bytes.
+    /// </summary>
+    public required int Height { get; init; }
 }
