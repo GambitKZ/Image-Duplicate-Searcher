@@ -23,6 +23,8 @@ public class ImageTileViewModel : INotifyPropertyChanged
     private readonly Func<string, bool, Task>? _reportStatus;
     private readonly IPlatformFileService? _platformFileService;
     private bool _isDeleted;
+    private int _sourceWidth;
+    private int _sourceHeight;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -58,6 +60,28 @@ public class ImageTileViewModel : INotifyPropertyChanged
             if (ReferenceEquals(value, _image)) return;
             _image = value;
             OnPropertyChanged(nameof(Image));
+        }
+    }
+
+    public int SourceWidth
+    {
+        get => _sourceWidth;
+        set
+        {
+            if (value == _sourceWidth) return;
+            _sourceWidth = value;
+            OnPropertyChanged(nameof(SourceWidth));
+        }
+    }
+
+    public int SourceHeight
+    {
+        get => _sourceHeight;
+        set
+        {
+            if (value == _sourceHeight) return;
+            _sourceHeight = value;
+            OnPropertyChanged(nameof(SourceHeight));
         }
     }
 
@@ -145,12 +169,15 @@ public class ImageTileViewModel : INotifyPropertyChanged
             var result = await displayManager.GetImageDisplayAsync(Path).ConfigureAwait(false);
             var imgSrc = ImageSource.FromStream(() => new MemoryStream(result.ImageBytes));
 
-            MainThread.BeginInvokeOnMainThread(() =>
+            await MainThread.InvokeOnMainThreadAsync(() =>
             {
                 Image = imgSrc;
                 IsPlaceholder = result.IsPlaceholder;
                 PlaceholderReason = result.Reason;
-            });
+                SourceWidth = result.Width;
+                SourceHeight = result.Height;
+                return Task.CompletedTask;
+            }).ConfigureAwait(false);
         }
         catch
         {

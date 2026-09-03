@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ImageDuplicationSearcher.Desktop.MainPage">
+             x:Class="ImageDuplicationSearcher.Desktop.MainPage"
+             x:Name="RootPage">
 
     <ScrollView>
         <StackLayout Padding="12" Spacing="12" Orientation="Vertical">
@@ -22,18 +23,19 @@
 
             <StackLayout x:Name="ProcessingSection" IsVisible="False">
             <!-- Navigation Section -->
-            <StackLayout Spacing="8">
+                <StackLayout Spacing="8">
                 <Label Text="Navigate Duplicate Groups" FontAttributes="Bold" />
-                <Grid ColumnDefinitions="Auto,Auto,*,Auto" ColumnSpacing="6" Margin="0,4">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="6" Margin="0,4">
+                    <StackLayout Grid.Column="0" Orientation="Horizontal" Spacing="6" HorizontalOptions="Start">
+                        <Entry x:Name="GroupEntry" WidthRequest="80" Placeholder="Group #" Keyboard="Numeric" HorizontalOptions="Start" Completed="OnGoClicked" />
+                        <Label x:Name="SummaryLabel" Text="/0" VerticalOptions="Center" HorizontalOptions="Start" />
+                    </StackLayout>
+                    <Label x:Name="GroupHashLabel" Grid.Column="2" Text="Hash: -" VerticalOptions="Center" HorizontalOptions="End" />
+                </Grid>
+                <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="6" Margin="0,4">
                     <Button x:Name="PrevButton" Grid.Column="0" Text="Previous" HorizontalOptions="Start" />
                     <Button x:Name="NextButton" Grid.Column="1" Text="Next" HorizontalOptions="Start" />
-                    <Label x:Name="SummaryLabel" Grid.Column="2" Text="0 / 0" VerticalOptions="Center" HorizontalOptions="Start" />
-                    <Label x:Name="GroupHashLabel" Grid.Column="3" Text="Hash: -" VerticalOptions="Center" HorizontalOptions="End" />
-                </Grid>
-                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" Margin="0,4">
-                    <Entry x:Name="GroupEntry" Placeholder="Group #" Keyboard="Numeric" HorizontalOptions="Start" />
-                    <Button x:Name="GoButton" Text="Go" Grid.Column="1" HorizontalOptions="Start" />
-                    <Label x:Name="NavErrorLabel" Grid.Column="2" TextColor="Red" IsVisible="False" VerticalOptions="Center" />
+                    <Label x:Name="NavErrorLabel" Grid.Column="2" TextColor="Red" IsVisible="False" VerticalOptions="Center" HorizontalOptions="Start" />
                 </Grid>
             </StackLayout>
 
@@ -52,7 +54,7 @@
                             <DataTemplate>
                                 <Frame Padding="6" Margin="6" HasShadow="False" BorderColor="#DDDDDD">
                                     <StackLayout>
-                                        <Image Source="{Binding Image}" Aspect="AspectFill" HeightRequest="120" />
+                                        <Image Source="{Binding Image}" Aspect="AspectFit" HorizontalOptions="FillAndExpand" HeightRequest="{Binding Source={x:Reference RootPage}, Path=GroupImageHeight}" />
                                         <Label Text="{Binding Path}" LineBreakMode="TailTruncation" FontSize="12" />
                                         <Label Text="{Binding SizeMB, StringFormat='Size: {0} MB'}" FontSize="12" />
                                         <Label Text="{Binding PlaceholderReason}" TextColor="Red" FontSize="11" />

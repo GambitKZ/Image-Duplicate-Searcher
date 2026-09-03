@@ -15,10 +15,23 @@ public class ImageDisplayManager : IImageDisplayManager
 {
     private readonly ConcurrentDictionary<string, ImageDisplayResult> _cache = new();
     private readonly byte[] _placeholderBytes;
+    private readonly int _placeholderWidth;
+    private readonly int _placeholderHeight;
 
     public ImageDisplayManager()
     {
         _placeholderBytes = PlaceholderResources.PlaceholderPngBytes;
+        try
+        {
+            using var p = Image.Load(_placeholderBytes);
+            _placeholderWidth = p.Width;
+            _placeholderHeight = p.Height;
+        }
+        catch
+        {
+            _placeholderWidth = 100;
+            _placeholderHeight = 100;
+        }
     }
 
     public async Task<ImageDisplayResult> GetImageDisplayAsync(string imagePath)
@@ -29,7 +42,9 @@ public class ImageDisplayManager : IImageDisplayManager
             {
                 ImageBytes = _placeholderBytes,
                 IsPlaceholder = true,
-                Reason = "Missing file"
+                Reason = "Missing file",
+                Width = _placeholderWidth,
+                Height = _placeholderHeight
             };
         }
 
@@ -42,7 +57,7 @@ public class ImageDisplayManager : IImageDisplayManager
         {
             if (!File.Exists(imagePath))
             {
-                var miss = new ImageDisplayResult { ImageBytes = _placeholderBytes, IsPlaceholder = true, Reason = "Missing file" };
+                var miss = new ImageDisplayResult { ImageBytes = _placeholderBytes, IsPlaceholder = true, Reason = "Missing file", Width = _placeholderWidth, Height = _placeholderHeight };
                 _cache.TryAdd(imagePath, miss);
                 return miss;
             }
@@ -51,29 +66,31 @@ public class ImageDisplayManager : IImageDisplayManager
 
             try
             {
-                // Validate decodability using ImageSharp. We don't modify the bytes; validation is sufficient.
-                using var _ = Image.Load(bytes);
+                // Decode with ImageSharp to obtain dimensions. We don't modify the bytes; validation is sufficient.
+                using var img = Image.Load(bytes);
+                var width = img.Width;
+                var height = img.Height;
+
+                var ok = new ImageDisplayResult { ImageBytes = bytes, IsPlaceholder = false, Reason = null, Width = width, Height = height };
+                _cache.TryAdd(imagePath, ok);
+                return ok;
             }
             catch (Exception)
             {
-                var unreadable = new ImageDisplayResult { ImageBytes = _placeholderBytes, IsPlaceholder = true, Reason = "Unreadable image" };
+                var unreadable = new ImageDisplayResult { ImageBytes = _placeholderBytes, IsPlaceholder = true, Reason = "Unreadable image", Width = _placeholderWidth, Height = _placeholderHeight };
                 _cache.TryAdd(imagePath, unreadable);
                 return unreadable;
             }
-
-            var ok = new ImageDisplayResult { ImageBytes = bytes, IsPlaceholder = false, Reason = null };
-            _cache.TryAdd(imagePath, ok);
-            return ok;
         }
         catch (UnauthorizedAccessException)
         {
-            var denied = new ImageDisplayResult { ImageBytes = _placeholderBytes, IsPlaceholder = true, Reason = "Permission denied" };
+            var denied = new ImageDisplayResult { ImageBytes = _placeholderBytes, IsPlaceholder = true, Reason = "Permission denied", Width = _placeholderWidth, Height = _placeholderHeight };
             _cache.TryAdd(imagePath, denied);
             return denied;
         }
         catch (Exception)
         {
-            var error = new ImageDisplayResult { ImageBytes = _placeholderBytes, IsPlaceholder = true, Reason = "Unreadable image" };
+            var error = new ImageDisplayResult { ImageBytes = _placeholderBytes, IsPlaceholder = true, Reason = "Unreadable image", Width = _placeholderWidth, Height = _placeholderHeight };
             _cache.TryAdd(imagePath, error);
             return error;
         }
