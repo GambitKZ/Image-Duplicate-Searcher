@@ -1,4 +1,4 @@
-namespace ImageDuplicateSearcher.Application.Image.Interfaces;
+﻿namespace ImageDuplicateSearcher.Application.Image.Interfaces;
 
 public interface IImageProcessor
 {

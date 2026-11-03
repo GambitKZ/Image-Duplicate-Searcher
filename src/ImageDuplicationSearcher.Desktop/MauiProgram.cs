@@ -1,11 +1,12 @@
 ﻿using CommunityToolkit.Maui;
-using ImageDuplicationSearcher.Desktop;
 using ImageDuplicateSearcher.Application.Common.Settings;
 using ImageDuplicateSearcher.Application.Image.Interfaces;
 using ImageDuplicateSearcher.Application.Image.Services;
 using ImageDuplicateSearcher.Application.Reporting.Interfaces;
 using ImageDuplicateSearcher.Application.Reporting.Services;
+using ImageDuplicationSearcher.Desktop;
 using ImageDuplicationSearcher.Desktop.Services;
+using Microsoft.Extensions.Configuration;
 
 public static class MauiProgram
 {
@@ -16,23 +17,18 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .UseMauiCommunityToolkit();
 
-        // Register runtime options used by desktop UI and application services.
-        builder.Services.Configure<ImageDuplicationOptions>(options =>
-        {
-            options.ImageDirectory = string.Empty;
-            options.OutputFilePath = Path.Combine(FileSystem.AppDataDirectory, "duplicates.json");
-            options.SupportedFormats = new List<string> { ".jpeg", ".jpg", ".png", ".bmp" };
-        });
+        builder.Configuration.AddJsonStream(typeof(MauiProgram).Assembly.GetManifestResourceStream("appsettings.json")!);
+        builder.Services.Configure<ImageDuplicationOptions>(builder.Configuration.GetSection(ImageDuplicationOptions.Section));
         builder.Services.AddSingleton<IResultsLoader, ResultsLoader>();
         builder.Services.AddSingleton<IDuplicateNavigator, DuplicateNavigator>();
         builder.Services.AddSingleton<IImageDisplayManager, ImageDisplayManager>();
         builder.Services.AddSingleton<IImageRemovalService, ImageRemovalService>();
 
-    #if ANDROID
+#if ANDROID
         builder.Services.AddTransient<IPlatformFileService, AndroidPlatformFileService>();
-    #else
+#else
         builder.Services.AddTransient<IPlatformFileService, WindowsPlatformFileService>();
-    #endif
+#endif
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<AppShell>();
 

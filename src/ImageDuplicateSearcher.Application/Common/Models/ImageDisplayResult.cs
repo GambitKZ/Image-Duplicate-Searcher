@@ -1,4 +1,4 @@
-using ImageDuplicateSearcher.Application.Image.Interfaces;
+﻿using ImageDuplicateSearcher.Application.Image.Interfaces;
 
 namespace ImageDuplicateSearcher.Application.Common.Models;
 

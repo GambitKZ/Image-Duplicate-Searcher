@@ -1,6 +1,4 @@
-using System.Text.Json.Serialization;
-
-using ImageDuplicateSearcher.Application.Reporting.Services;
+﻿using System.Text.Json.Serialization;
 
 namespace ImageDuplicateSearcher.Application.Common.Models;
 

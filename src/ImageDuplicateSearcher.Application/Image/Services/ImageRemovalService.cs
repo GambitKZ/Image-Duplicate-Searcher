@@ -1,8 +1,7 @@
-using System.Runtime.InteropServices;
-using Microsoft.VisualBasic.FileIO;
-
+﻿using System.Runtime.InteropServices;
 using ImageDuplicateSearcher.Application.Common.Models;
 using ImageDuplicateSearcher.Application.Image.Interfaces;
+using Microsoft.VisualBasic.FileIO;
 
 namespace ImageDuplicateSearcher.Application.Image.Services;
 

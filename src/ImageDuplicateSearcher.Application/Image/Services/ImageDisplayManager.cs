@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using SixLabors.ImageSharp;
 
 using ImageDuplicateSearcher.Application.Common.Models;
 using ImageDuplicateSearcher.Application.Image.Interfaces;

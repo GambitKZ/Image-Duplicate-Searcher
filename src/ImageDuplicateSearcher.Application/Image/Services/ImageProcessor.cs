@@ -1,10 +1,9 @@
-﻿using Microsoft.Extensions.Options;
+﻿using ImageDuplicateSearcher.Application.Common.Settings;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
-
-using ImageDuplicateSearcher.Application.Common.Settings;
-using ImageDuplicateSearcher.Application.Image.Interfaces;
 
 namespace ImageDuplicateSearcher.Application.Image.Services;
 

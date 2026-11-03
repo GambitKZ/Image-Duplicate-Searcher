@@ -1,4 +1,4 @@
-namespace ImageDuplicateSearcher.Application.Common.Models;
+﻿namespace ImageDuplicateSearcher.Application.Common.Models;
 
 /// <summary>
 /// Describes the render status of an image tile.
