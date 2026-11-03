@@ -1,5 +1,5 @@
 ﻿using ImageDuplicateSearcher.Application.Extensions;
-using ImageDuplicateSearcher.Application.Services;
+using ImageDuplicateSearcher.Application.Workflow.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

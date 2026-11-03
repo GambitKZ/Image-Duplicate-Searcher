@@ -1,10 +1,11 @@
-﻿using System.Text.Json;
-using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Models;
-using ImageDuplicateSearcher.Application.Settings;
+using System.Text.Json;
 using Microsoft.Extensions.Options;
 
-namespace ImageDuplicateSearcher.Application.Services;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Common.Settings;
+using ImageDuplicateSearcher.Application.Reporting.Interfaces;
+
+namespace ImageDuplicateSearcher.Application.Reporting.Services;
 
 /// <summary>
 /// UI-aware reporter that raises log messages for the UI and still persists duplicate groups to JSON.

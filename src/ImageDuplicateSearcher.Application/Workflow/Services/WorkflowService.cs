@@ -1,10 +1,13 @@
-﻿using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Models;
-using ImageDuplicateSearcher.Application.Settings;
 using Microsoft.Extensions.Options;
 using Spectre.Console;
 
-namespace ImageDuplicateSearcher.Application.Services;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Common.Settings;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+using ImageDuplicateSearcher.Application.Reporting.Interfaces;
+using ImageDuplicateSearcher.Application.Reporting.Services;
+
+namespace ImageDuplicateSearcher.Application.Workflow.Services;
 
 public class WorkflowService
 {

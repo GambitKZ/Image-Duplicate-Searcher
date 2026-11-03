@@ -1,9 +1,10 @@
-﻿using System.Runtime.InteropServices;
-using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Models;
+using System.Runtime.InteropServices;
 using Microsoft.VisualBasic.FileIO;
 
-namespace ImageDuplicateSearcher.Application.Services;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+
+namespace ImageDuplicateSearcher.Application.Image.Services;
 
 /// <summary>
 /// Attempts safe deletion of image files and maps common failures to <see cref="RemovalResult"/>.

@@ -1,6 +1,6 @@
-﻿using ImageDuplicateSearcher.Application.Models;
+using ImageDuplicateSearcher.Application.Common.Models;
 
-namespace ImageDuplicateSearcher.Application.Interfaces;
+namespace ImageDuplicateSearcher.Application.Reporting.Interfaces;
 
 /// <summary>
 /// Defines the contract for reporting duplicate image groups.

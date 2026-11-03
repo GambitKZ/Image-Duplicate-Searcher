@@ -1,7 +1,8 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Models;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+using ImageDuplicateSearcher.Application.Reporting.Interfaces;
 using ImageDuplicationSearcher.Desktop.Services;
 using ImageDuplicationSearcher.Desktop.ViewModels;
 

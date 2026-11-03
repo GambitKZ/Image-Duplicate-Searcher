@@ -1,7 +1,8 @@
 using System.ComponentModel;
-using ImageDuplicateSearcher.Application.Models;
 
-namespace ImageDuplicateSearcher.Application.Interfaces;
+using ImageDuplicateSearcher.Application.Common.Models;
+
+namespace ImageDuplicateSearcher.Application.Reporting.Interfaces;
 
 /// <summary>
 /// Centralized navigation contract for duplicate result groups.

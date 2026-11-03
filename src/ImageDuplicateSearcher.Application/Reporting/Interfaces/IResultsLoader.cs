@@ -1,6 +1,7 @@
-using ImageDuplicateSearcher.Application.Models;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Reporting.Services;
 
-namespace ImageDuplicateSearcher.Application.Interfaces;
+namespace ImageDuplicateSearcher.Application.Reporting.Interfaces;
 
 /// <summary>
 /// Defines the contract for loading and deserializing JSON search results from the Desktop application.

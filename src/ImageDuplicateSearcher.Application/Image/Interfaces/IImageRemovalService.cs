@@ -1,6 +1,6 @@
-using ImageDuplicateSearcher.Application.Models;
+using ImageDuplicateSearcher.Application.Common.Models;
 
-namespace ImageDuplicateSearcher.Application.Interfaces;
+namespace ImageDuplicateSearcher.Application.Image.Interfaces;
 
 /// <summary>
 /// Defines a contract for attempting to remove an image file from disk.

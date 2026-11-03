@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace ImageDuplicateSearcher.Application.Models;
+namespace ImageDuplicateSearcher.Application.Common.Models;
 
 /// <summary>
 /// View-model shape for an image tile shown in the Desktop UI.

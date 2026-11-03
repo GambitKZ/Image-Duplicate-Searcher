@@ -1,6 +1,8 @@
 using System.Text.Json.Serialization;
 
-namespace ImageDuplicateSearcher.Application.Models;
+using ImageDuplicateSearcher.Application.Reporting.Services;
+
+namespace ImageDuplicateSearcher.Application.Common.Models;
 
 /// <summary>
 /// Represents an image entry in a duplicate search result group.

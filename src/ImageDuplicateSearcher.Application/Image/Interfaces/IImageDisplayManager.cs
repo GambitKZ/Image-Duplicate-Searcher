@@ -1,7 +1,8 @@
 using System.Threading.Tasks;
-using ImageDuplicateSearcher.Application.Models;
 
-namespace ImageDuplicateSearcher.Application.Interfaces;
+using ImageDuplicateSearcher.Application.Common.Models;
+
+namespace ImageDuplicateSearcher.Application.Image.Interfaces;
 
 /// <summary>
 /// Handles loading and validation of image files for UI rendering.

@@ -1,8 +1,9 @@
-﻿using System.Text.Json;
-using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Models;
+using System.Text.Json;
 
-namespace ImageDuplicateSearcher.Application.Services;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Reporting.Interfaces;
+
+namespace ImageDuplicateSearcher.Application.Reporting.Services;
 
 /// <summary>
 /// Service for loading and deserializing JSON search results from the Desktop application.

@@ -1,8 +1,12 @@
-﻿using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Services;
-using ImageDuplicateSearcher.Application.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+
+using ImageDuplicateSearcher.Application.Common.Settings;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+using ImageDuplicateSearcher.Application.Image.Services;
+using ImageDuplicateSearcher.Application.Reporting.Interfaces;
+using ImageDuplicateSearcher.Application.Reporting.Services;
+using ImageDuplicateSearcher.Application.Workflow.Services;
 
 namespace ImageDuplicateSearcher.Application.Extensions;
 

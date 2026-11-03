@@ -1,4 +1,4 @@
-namespace ImageDuplicateSearcher.Application.Models;
+namespace ImageDuplicateSearcher.Application.Common.Models;
 
 /// <summary>
 /// Canonical result codes for image removal attempts.

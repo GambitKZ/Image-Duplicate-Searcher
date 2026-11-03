@@ -1,6 +1,6 @@
 using System;
 
-namespace ImageDuplicateSearcher.Application.Resources;
+namespace ImageDuplicateSearcher.Application.Image.Services;
 
 /// <summary>
 /// Provides embedded placeholder image bytes used when real images cannot be displayed.

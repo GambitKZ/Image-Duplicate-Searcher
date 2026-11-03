@@ -1,11 +1,12 @@
-﻿using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Settings;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 
-namespace ImageDuplicateSearcher.Application.Services;
+using ImageDuplicateSearcher.Application.Common.Settings;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+
+namespace ImageDuplicateSearcher.Application.Image.Services;
 
 /// <summary>
 /// Handles processing of images, including scanning directories for image files.
@@ -44,7 +45,7 @@ public class ImageProcessor : IImageProcessor
             throw new FileNotFoundException("Image file not found.", filePath);
         }
 
-        using var image = Image.Load(filePath);
+        using var image = SixLabors.ImageSharp.Image.Load(filePath);
         image.Mutate(x => x.Resize(32, 32));
         var stream = new MemoryStream();
         image.SaveAsJpeg(stream);
@@ -55,7 +56,7 @@ public class ImageProcessor : IImageProcessor
     // <inheritdoc/>
     public ulong ComputePerceptualHash(MemoryStream thumbnail)
     {
-        using var image = Image.Load<Rgba32>(thumbnail);
+        using var image = SixLabors.ImageSharp.Image.Load<Rgba32>(thumbnail);
         image.Mutate(x => x.Resize(32, 32).Grayscale());
 
         var pixels = new double[32, 32];

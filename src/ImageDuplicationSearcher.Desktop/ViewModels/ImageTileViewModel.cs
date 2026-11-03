@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
-using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Models;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
 using ImageDuplicationSearcher.Desktop.Services;
 
 namespace ImageDuplicationSearcher.Desktop.ViewModels;

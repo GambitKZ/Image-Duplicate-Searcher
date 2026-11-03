@@ -1,8 +1,10 @@
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 using ImageDuplicationSearcher.Desktop;
-using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Services;
-using ImageDuplicateSearcher.Application.Settings;
+using ImageDuplicateSearcher.Application.Common.Settings;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+using ImageDuplicateSearcher.Application.Image.Services;
+using ImageDuplicateSearcher.Application.Reporting.Interfaces;
+using ImageDuplicateSearcher.Application.Reporting.Services;
 using ImageDuplicationSearcher.Desktop.Services;
 
 public static class MauiProgram

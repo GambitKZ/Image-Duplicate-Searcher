@@ -1,8 +1,9 @@
-﻿using System.ComponentModel;
-using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Models;
+using System.ComponentModel;
 
-namespace ImageDuplicateSearcher.Application.Services;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Reporting.Interfaces;
+
+namespace ImageDuplicateSearcher.Application.Reporting.Services;
 
 /// <summary>
 /// Application-layer service that manages navigation over duplicate search result groups.

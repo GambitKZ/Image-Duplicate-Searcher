@@ -1,10 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using ImageDuplicateSearcher.Application.Interfaces;
-using ImageDuplicateSearcher.Application.Models;
-using ImageDuplicateSearcher.Application.Resources;
 using SixLabors.ImageSharp;
 
-namespace ImageDuplicateSearcher.Application.Services;
+using ImageDuplicateSearcher.Application.Common.Models;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+
+namespace ImageDuplicateSearcher.Application.Image.Services;
 
 /// <summary>
 /// Application-layer implementation that loads image bytes for the UI and
@@ -23,7 +23,7 @@ public class ImageDisplayManager : IImageDisplayManager
         _placeholderBytes = PlaceholderResources.PlaceholderPngBytes;
         try
         {
-            using var p = Image.Load(_placeholderBytes);
+            using var p = SixLabors.ImageSharp.Image.Load(_placeholderBytes);
             _placeholderWidth = p.Width;
             _placeholderHeight = p.Height;
         }
@@ -67,7 +67,7 @@ public class ImageDisplayManager : IImageDisplayManager
             try
             {
                 // Decode with ImageSharp to obtain dimensions. We don't modify the bytes; validation is sufficient.
-                using var img = Image.Load(bytes);
+                using var img = SixLabors.ImageSharp.Image.Load(bytes);
                 var width = img.Width;
                 var height = img.Height;
 

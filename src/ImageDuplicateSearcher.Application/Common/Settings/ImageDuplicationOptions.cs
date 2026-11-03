@@ -1,4 +1,4 @@
-﻿namespace ImageDuplicateSearcher.Application.Settings;
+namespace ImageDuplicateSearcher.Application.Common.Settings;
 
 /// <summary>
 /// Options for image duplication configuration.

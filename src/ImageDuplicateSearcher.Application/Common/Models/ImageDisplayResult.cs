@@ -1,4 +1,6 @@
-namespace ImageDuplicateSearcher.Application.Models;
+using ImageDuplicateSearcher.Application.Image.Interfaces;
+
+namespace ImageDuplicateSearcher.Application.Common.Models;
 
 /// <summary>
 /// Result returned by <see cref="IImageDisplayManager"/> describing the bytes to display,
