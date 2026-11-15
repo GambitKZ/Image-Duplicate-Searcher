@@ -48,13 +48,13 @@ public class UiReporter : IReporter
             foreach (var image in group.Value)
             {
                 double sizeMB = image.FileSize / (1024.0 * 1024.0);
-                OnLogMessage?.Invoke($"  - {image.FilePath} ({sizeMB:F2} MB)");
+                OnLogMessage?.Invoke($"  - {image.FilePath} ({sizeMB:F2} MB, {image.SizePixel})");
             }
             groupNumber++;
         }
 
         // Serialize to JSON and save to file (reuse existing format)
-        var jsonData = duplicates.Select(g => new { hash = g.Key, images = g.Value.Select(img => new { path = img.FilePath, sizeMB = img.FileSize / (1024.0 * 1024.0) }).ToArray() }).ToArray();
+        var jsonData = duplicates.Select(g => new { hash = g.Key, images = g.Value.Select(img => new { path = img.FilePath, sizeMB = img.FileSize / (1024.0 * 1024.0), sizePixel = img.SizePixel }).ToArray() }).ToArray();
         var json = JsonSerializer.Serialize(jsonData, new JsonSerializerOptions { WriteIndented = true });
         try
         {

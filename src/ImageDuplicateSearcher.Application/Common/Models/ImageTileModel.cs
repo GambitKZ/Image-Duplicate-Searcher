@@ -10,6 +10,7 @@ public class ImageTileModel : INotifyPropertyChanged
 {
     private string _path = string.Empty;
     private double _sizeMB;
+    private string _sizePixel = string.Empty;
     private bool _isDeleted;
     private ImageRenderStatus _renderStatus = ImageRenderStatus.Available;
     private string? _placeholderReason;
@@ -42,6 +43,20 @@ public class ImageTileModel : INotifyPropertyChanged
             if (value.Equals(_sizeMB)) return;
             _sizeMB = value;
             OnPropertyChanged(nameof(SizeMB));
+        }
+    }
+
+    /// <summary>
+    /// Image dimensions in pixels, formatted as "width x height".
+    /// </summary>
+    public string SizePixel
+    {
+        get => _sizePixel;
+        set
+        {
+            if (value == _sizePixel) return;
+            _sizePixel = value;
+            OnPropertyChanged(nameof(SizePixel));
         }
     }
 
@@ -96,6 +111,7 @@ public class ImageTileModel : INotifyPropertyChanged
         {
             Path = src.Path,
             SizeMB = src.SizeMB,
+            SizePixel = src.SizePixel,
             IsDeleted = src.IsDeleted,
             RenderStatus = ImageRenderStatus.Available,
             PlaceholderReason = null

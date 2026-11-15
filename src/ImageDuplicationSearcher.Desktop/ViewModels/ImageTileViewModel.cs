@@ -15,6 +15,7 @@ public class ImageTileViewModel : INotifyPropertyChanged
     private ImageSource? _image;
     private string _path = string.Empty;
     private double _sizeMB;
+    private string _sizePixel = string.Empty;
     private bool _isPlaceholder;
     private string? _placeholderReason;
     private DuplicateSearchResultImage? _sourceImage;
@@ -47,6 +48,7 @@ public class ImageTileViewModel : INotifyPropertyChanged
 
         Path = source.Path;
         SizeMB = source.SizeMB;
+        SizePixel = source.SizePixel;
         IsDeleted = source.IsDeleted;
 
         RemoveCommand = new Command(async () => await ExecuteRemoveAsync().ConfigureAwait(false));
@@ -104,6 +106,17 @@ public class ImageTileViewModel : INotifyPropertyChanged
             if (value.Equals(_sizeMB)) return;
             _sizeMB = value;
             OnPropertyChanged(nameof(SizeMB));
+        }
+    }
+
+    public string SizePixel
+    {
+        get => _sizePixel;
+        set
+        {
+            if (value == _sizePixel) return;
+            _sizePixel = value;
+            OnPropertyChanged(nameof(SizePixel));
         }
     }
 

@@ -21,6 +21,12 @@ public record DuplicateSearchResultImage
     public required double SizeMB { get; set; }
 
     /// <summary>
+    /// Gets or sets the image dimensions in pixels, formatted as "width x height".
+    /// </summary>
+    [JsonPropertyName("sizePixel")]
+    public string SizePixel { get; set; } = string.Empty;
+
+    /// <summary>
     /// Gets a value indicating whether this image has been marked as deleted in the current session.
     /// This property is not part of the source JSON; it exists only in memory for session state.
     /// </summary>

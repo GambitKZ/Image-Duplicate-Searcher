@@ -22,6 +22,19 @@ public class WorkflowService
         _reporter = reporter;
     }
 
+    private static string GetSizePixel(string imagePath)
+    {
+        try
+        {
+            var info = SixLabors.ImageSharp.Image.Identify(imagePath);
+            return info is null ? string.Empty : $"{info.Width} x {info.Height}";
+        }
+        catch (Exception)
+        {
+            return string.Empty;
+        }
+    }
+
     public void ExecuteWorkflow()
     {
         // Keep backward-compatible synchronous API by running the async method and blocking.
@@ -97,7 +110,8 @@ public class WorkflowService
                         var imageModel = new ImageModel
                         {
                             FilePath = imagePath,
-                            FileSize = new FileInfo(imagePath).Length
+                            FileSize = new FileInfo(imagePath).Length,
+                            SizePixel = GetSizePixel(imagePath)
                         };
 
                         if (duplicateDictionary.TryGetValue(hash, out var value))
@@ -128,7 +142,8 @@ public class WorkflowService
                 var imageModel = new ImageModel
                 {
                     FilePath = imagePath,
-                    FileSize = new FileInfo(imagePath).Length
+                    FileSize = new FileInfo(imagePath).Length,
+                    SizePixel = GetSizePixel(imagePath)
                 };
 
                 if (duplicateDictionary.TryGetValue(hash, out var value))
